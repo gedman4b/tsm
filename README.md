@@ -35,6 +35,20 @@ We build 4 differentiation models, _Diff-TSMs_, spanning 135M to 1.5B parameters
 from transformers import AutoModelForCausalLM, AutoTokenizer
 checkpoint = "AvataarAI/Diff-TSM-Qwen-0.5B"
 device = "cuda" # for GPU usage or "cpu" for CPU usage
+# pip install transformers
+from transformers import AutoModelForCausalLM, AutoTokenizer
+checkpoint = "AvataarAI/Diff-TSM-Qwen-0.5B"
+device = "cuda" # for GPU usage or "cpu" for CPU usage
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct")
+model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
+messages = [
+    {"role": "system", "content": "Please reason step by step, and put your final answer within \\boxed{{}}."},
+    {"role": "user", "content": r"What is the derivative of the following function w.r.t. x: e^(2x) \sin(14x)"},
+]
+input_text=tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+inputs = tokenizer.encode(input_text, return_tensors="pt").to(device)
+outputs = model.generate(inputs, temperature=0.1, top_p=0.7, top_k=50, do_sample=True, max_new_tokens=2048)
+print(tokenizer.decode(outputs[0]))
 model = AutoModelForCausalLM.from_pretrained(checkpoint).to(device)
 messages = [
     {"role": "system", "content": "Please reason step by step, and put your final answer within \\boxed{{}}."},
